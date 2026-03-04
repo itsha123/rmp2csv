@@ -93,7 +93,8 @@ class ViewPage(QtWidgets.QWizardPage):
         layout.addWidget(self._combo)
         self.setLayout(layout)
 
-        self.registerField("view*", self._combo, "currentText", self._combo.currentIndexChanged)
+        # Use a text-changed notifier so QWizard reliably updates the field value.
+        self.registerField("view*", self._combo, "currentText", self._combo.currentTextChanged)
 
 
 class ExportPage(QtWidgets.QWizardPage):
@@ -129,6 +130,7 @@ class ExportPage(QtWidgets.QWizardPage):
         self.registerField("out_csv*", self._out_edit)
 
         self._thread: QtCore.QThread | None = None
+        self._worker: ExportWorker | None = None
         self._done = False
         self._last_rc: int | None = None
 
@@ -188,6 +190,7 @@ class ExportPage(QtWidgets.QWizardPage):
         self._browse_btn.setEnabled(False)
 
         req = ExportRequest(snapshot=snap, view=view, out_csv=out_csv)
+        # Keep strong references to avoid GC while the thread is running.
         worker = ExportWorker(req)
         thread = QtCore.QThread(self)
         worker.moveToThread(thread)
@@ -201,7 +204,12 @@ class ExportPage(QtWidgets.QWizardPage):
         worker.finished.connect(worker.deleteLater)
         thread.finished.connect(thread.deleteLater)
 
+        # Safety: if the thread exits unexpectedly without calling _on_finished,
+        # restore UI state so the wizard doesn't get stuck on "Exporting…".
+        thread.finished.connect(self._on_thread_finished)
+
         self._thread = thread
+        self._worker = worker
         thread.start()
 
     def _on_failed(self, tb: str) -> None:
@@ -224,6 +232,21 @@ class ExportPage(QtWidgets.QWizardPage):
         self.completeChanged.emit()
 
         self._thread = None
+        self._worker = None
+
+    def _on_thread_finished(self) -> None:
+        # If we still look like we're exporting, unwind UI state.
+        if self._status.text() == "Exporting…" and not self._done:
+            self._status.setText("Failed (export worker terminated).")
+            self._progress.setRange(0, 1)
+            self._progress.setValue(1)
+            self._run_btn.setEnabled(True)
+            self._browse_btn.setEnabled(True)
+            self._done = True
+            self.completeChanged.emit()
+
+        self._thread = None
+        self._worker = None
 
 
 class ExportWizard(QtWidgets.QWizard):
