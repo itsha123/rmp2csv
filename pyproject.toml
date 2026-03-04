@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rmp2csv"
+version = "1.0.1"
+description = "Offline Sysinternals RAMMap .RMP snapshot to CSV exporter"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "GPL-3.0-or-later"
+license-files = ["LICENSE"]
+authors = [{ name = "Hamid" }]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Operating System :: Microsoft :: Windows",
+]
+
+dependencies = []
+
+[project.optional-dependencies]
+gui = ["PySide6>=6.6"]
+
+[project.scripts]
+rmp2csv = "extract:cli"
+rmp2csv-gui = "rmp2csv_gui:gui"
+
+[tool.setuptools]
+py-modules = ["extract", "rmp2csv", "rmp2csv_gui"]
+
+[tool.setuptools.package-data]
+"*" = ["*.md"]

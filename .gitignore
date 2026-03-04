@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# IDE
+.vscode/
+
+# Local tooling (not part of the exporter)
+/tools/
+
+# .NET build output
+**/bin/
+**/obj/
+
+# Artifacts (generated outputs, large files)
+_artifacts/
+
+# RAMMap snapshots
+*.rmp
+*.RMP
+
+# Data exports
+*.csv
+*.json
+*.tsv
+*.txt
+
+# Logs
+*.log
+
+# Packaging
+dist/
+build/
+*.egg-info/
