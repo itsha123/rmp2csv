@@ -2,6 +2,11 @@
 
 Offline `.RMP` (Sysinternals RAMMap snapshot) → CSV exporter.
 
+## Disclaimer (AI-generated)
+
+This project (including the reverse-engineering notes) was generated entirely with AI assistance.
+It may contain mistakes or incorrect assumptions. Please review and validate outputs before relying on it.
+
 Reverse-engineering notes on the `.RMP` structure are in [RMP_FORMAT.md](RMP_FORMAT.md).
 
 ## Install (PyPI)
