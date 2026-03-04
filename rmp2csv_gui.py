@@ -96,6 +96,18 @@ class ViewPage(QtWidgets.QWizardPage):
         # Use a text-changed notifier so QWizard reliably updates the field value.
         self.registerField("view*", self._combo, "currentText", self._combo.currentTextChanged)
 
+        # Some QWizard/PySide combinations don't populate a mandatory field
+        # until the notify signal fires. If the default selection is used
+        # without any user interaction, the page can incorrectly block Next.
+        self._combo.currentIndexChanged.connect(self._sync_field)
+
+    def initializePage(self) -> None:
+        self._sync_field()
+
+    def _sync_field(self) -> None:
+        self.setField("view", self._combo.currentText())
+        self.completeChanged.emit()
+
 
 class ExportPage(QtWidgets.QWizardPage):
     def __init__(self) -> None:
