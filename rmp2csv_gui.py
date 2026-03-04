@@ -102,7 +102,15 @@ class ViewPage(QtWidgets.QWizardPage):
         self._combo.currentIndexChanged.connect(self._sync_field)
 
     def initializePage(self) -> None:
+        # Ensure the wizard sees a concrete value even if the user doesn't
+        # touch the default selection.
+        if self._combo.count() > 0 and self._combo.currentIndex() < 0:
+            self._combo.setCurrentIndex(0)
         self._sync_field()
+
+    def isComplete(self) -> bool:
+        # Don't rely solely on QWizard's mandatory-field tracking for QComboBox.
+        return bool(self._combo.currentText().strip())
 
     def _sync_field(self) -> None:
         self.setField("view", self._combo.currentText())
